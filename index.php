@@ -5,8 +5,6 @@ include_once("mysql.php");
 $baseUrl = (isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] === "on" ? "https" : "http")."://".$_SERVER["HTTP_HOST"].$_SERVER["REQUEST_URI"];
 $baseUrl = str_replace("index.php", "", $baseUrl);
 
-// asdbashjd
-
 ?>
 <!DOCTYPE HTML>
 <html>
