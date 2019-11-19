@@ -1,0 +1,126 @@
+/*---------- Global styles ----------*/
+
+.wrapper {
+	display: flex;
+	justify-content: space-around;
+}
+
+.form, .data {
+	width: 40%;
+	margin: 25px;
+	padding: 25px;
+	border: 1px solid var(--main-font-color);
+	background: var(--super-light-color);
+}
+
+.form__head, .data__head {
+	width: 100%;
+	margin-bottom: 10px;
+	float: left;
+}
+
+.form__row {
+	width: 100%;
+	margin: 5px 0px;
+	float: left;
+}
+
+.form__label {
+	height: 26px;
+	width: 30%;
+	line-height: 32px;
+	font-size: 1em;
+	color: var(--main-font-color);
+	float: left;
+}
+
+.form__input {
+	width: 70%;
+	box-sizing: border-box;
+	border: 1px solid var(--main-font-color);
+	background: var(--main-bg-color);
+	color: var(--main-font-color);
+	font-size: 1em;
+	line-height: 24px;
+}
+
+.form__input--small {
+	width: 30%;
+}
+
+.form__input--small:nth-child(odd) {
+	float: right;
+}
+
+input.form__input, select.form__input {
+	height: 26px;
+	padding: 0px 5px;
+}
+
+textarea.form__input {
+	height: 104px;
+	min-height: 104px;
+	max-height: 208px;
+	min-width: 70%;
+	max-width: 70%;
+	padding: 5px;
+	overflow-x: hidden;
+	overflow-y: auto;
+}
+
+.form__button {
+	margin-left: 10px;
+	padding: 5px;
+	font-size: 1em;
+	border: 1px solid var(--main-font-color);
+	background: var(--main-font-color);
+	color: var(--main-bg-color);
+	float: right;
+}
+
+.form__button:last-of-type {
+	margin-left: 0px;
+}
+
+.form__button:hover {
+	background: var(--aspect-color);
+}
+
+.data__container {
+	max-height: 600px;
+	width: 100%;
+	overflow-x: hidden;
+	overflow-y: auto;
+}
+
+.data__row {
+	width: 100%;
+	margin: 2.5px 0px;
+	padding: 2.5px;
+	font-size: 0.8em;
+	color: var(--main-font-color);
+	box-sizing: border-box;
+	float: left;
+}
+
+.data__row:nth-child(odd) {
+	background: var(--light-color);
+}
+
+.data__row:hover {
+	font-weight: bold;
+}
+
+@media only screen and (max-width: 768px) {
+	.wrapper {
+		flex-direction: column;
+		justify-content: center;
+	}
+	
+	.form, .data {
+		width: 80%;
+		width: calc(90% - 50px);
+		width: -moz-calc(90% - 50px);
+		width: -webkit-calc(90% - 50px);
+	}
+}
