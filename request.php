@@ -2,7 +2,7 @@
 
 	if (isset($_POST) && isset($_POST["authorization_key"]) && isset($_POST["type"]) && isset($_POST["data"]))
 	{
-		if (isset($_POST["authorization_key"]) && $_POST["authorization_key"] == "1234")
+		if (isset($_POST["authorization_key"]) && $_POST["authorization_key"] == "GEO1")
 		{
 		$validTypes = ["categories", "institutes", "levels", "paths", "people", "rooms"];
 		
@@ -43,7 +43,7 @@
 						{
 						$fields = Array();
 						
-						$query = "DESCRIBE ba_".$_POST["type"];
+						$query = "DESCRIBE ".$_POST["type"];
 						$result = mysqli_query($mysql, $query);
 						
 							while ($row = mysqli_fetch_array($result))
@@ -58,24 +58,26 @@
 						}
 					
 						if ($fieldCheck === true)
-						{					
+						{
+						$foreignKeys = ["level", "room", "category", "institute"];
+							
 							for ($i = 0; $i < count($validTypes); $i++)
 							{
 								if ($_POST["type"] == $validTypes[$i])
 								{
 									if ($_POST["data"] == "all" || $_POST["data"] == "*")
 									{
-									$query = "SELECT * FROM ba_".$_POST["type"]." ORDER BY id ASC";
+									$query = "SELECT * FROM ".$_POST["type"]." ORDER BY id ASC";
 									}
 									else
 									{
 										if ($criteria[1] == "LIKE")
 										{
-										$query = "SELECT * FROM ba_".$_POST["type"]." WHERE ".$criteria[0]." ".$criteria[1]." '%".$criteria[2]."%' ORDER BY id ASC";
+										$query = "SELECT * FROM ".$_POST["type"]." WHERE ".$criteria[0]." ".$criteria[1]." '%".$criteria[2]."%' ORDER BY id ASC";
 										}
 										else
 										{
-										$query = "SELECT * FROM ba_".$_POST["type"]." WHERE ".$criteria[0]." ".$criteria[1]." '".$criteria[2]."' ORDER BY id ASC";
+										$query = "SELECT * FROM ".$_POST["type"]." WHERE ".$criteria[0]." ".$criteria[1]." '".$criteria[2]."' ORDER BY id ASC";
 										}
 									}
 									
@@ -88,9 +90,57 @@
 									$tmpData = Array();
 									
 										foreach ($row as $key => $val)
-										{ 
-										$tmpData[$key] = $val; 
-										} 
+										{
+											if (in_array($key, $foreignKeys))
+											{
+											$tmpData2 = Array();
+												
+												if ($key == "level")
+												{
+												$query2	= "SELECT * FROM levels WHERE id = '$val'";
+												}
+												else if ($key == "room")
+												{
+												$query2	= "SELECT * FROM rooms WHERE id = '$val'";
+												}
+												else if ($key == "category")
+												{
+												$query2	= "SELECT * FROM categories WHERE id = '$val'";
+												}
+												else if ($key == "institute")
+												{
+												$query2	= "SELECT * FROM institutes WHERE id = '$val'";
+												}
+												
+											$result2 = mysqli_query($mysql, $query2);
+											$row2 = mysqli_fetch_assoc($result2);
+											
+												foreach ($row2 as $key2 => $val2)
+												{
+												$tmpData2[$key2] = $val2;
+												}
+											
+											$val = $tmpData2;
+											}
+											
+										$tmpData[$key] = $val;
+										}
+										
+										if ($_POST["type"] == "rooms")
+										{
+										$tmpData2 = Array();
+										$tmpId = $row["id"];
+										
+										$query2 = "SELECT name FROM people WHERE room = '$tmpId' ORDER BY name ASC";
+										$result2 = mysqli_query($mysql, $query2);
+										
+											while ($row2 = mysqli_fetch_assoc($result2))
+											{										
+											$tmpData2[] = $row2["name"];
+											}
+											
+										$tmpData["people"] = $tmpData2;
+										}
 
 									$tmpObject[] = $tmpData; 
 									}

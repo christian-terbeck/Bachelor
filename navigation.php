@@ -4,7 +4,11 @@ include("mysql.php");
 
 //-->Define variables
 
-$labels = ["destination_de" => "Ziel", "destination_en" => "Destination", "destination_es" => "Destino"];
+$labels = ["room_de" => "Raum", "room_en" => "Room", "room_es" => "Habitación",
+"follow_instructions_de" => "Folgen Sie den Anweisungen auf dem Bildschirm.", "follow_instructions_en" => "Follow the instructions on your screen.", "follow_instructions_es" => "Siga las instrucciones en su pantalla.",
+"location_de" => "Standort", "location_en" => "Location", "location_es" => "Ubicación",
+"elevator_stairs_de" => "Aufzug", "elevator_stairs_en" => "Elevator", "elevator_stairs_es" => "Ascensor",
+"destination_de" => "Ziel", "destination_en" => "Destination", "destination_es" => "Destino"];
 
 //-->Get parameters
 
@@ -28,7 +32,9 @@ $languages = ["de", "en", "es"];
 
 $mapWidth = 45; //whole image displays a length of 45m
 $currentLevel = 0; //ground floor where display is located
-$start = [$currentLevel, [64, 60]]; //start location of user right in front of main display
+$start = [$currentLevel, [67, 60]]; //start location of user right in front of main display
+$relevantLevels = Array(); //store relevant levels in array
+$relevantLevels[] = $currentLevel;
 
 //-->Fetch
 
@@ -41,7 +47,7 @@ $start = [$currentLevel, [64, 60]]; //start location of user right in front of m
 	exit("Missing destination parameter");
 	}
 
-$query = "SELECT * FROM ba_rooms WHERE id = '$destination'";
+$query = "SELECT * FROM rooms WHERE id = '$destination'";
 $result = mysqli_query($mysql, $query);
 $check = mysqli_num_rows($result);
 
@@ -50,11 +56,16 @@ $check = mysqli_num_rows($result);
 	$room = mysqli_fetch_assoc($result);
 	$roomLevel = $room["level"];
 	
-	$query = "SELECT * FROM ba_levels WHERE id = '$roomLevel'";
+	$query = "SELECT * FROM levels WHERE id = '$roomLevel'";
 	$result = mysqli_query($mysql, $query);
 	$level = mysqli_fetch_assoc($result);
 	
 	$end = [$level["name"], [$room["doorX"], $room["doorY"]]]; //destination position
+	
+		if ($level["name"] != $currentLevel)
+		{
+		$relevantLevels[] = $level["name"];
+		}
 	}
 	else
 	{
@@ -63,7 +74,7 @@ $check = mysqli_num_rows($result);
 
 ?>
 <!DOCTYPE HTML>
-<html>
+<?php echo '<html lang="'.$language.'">'; ?>
 
 	<head>
 	
@@ -102,10 +113,24 @@ $check = mysqli_num_rows($result);
 				<div class="overlay__animation fas fa-circle-notch fa-spin"></div>
 				<?php
 				
-				echo '<h1 class="overlay__head">Raum '.$room["no"].'</h1>';
+				echo '<h1 class="overlay__head">'.$labels["room_".$language].' '.$room["no"].'</h1>
+				<div class="overlay__text">'.$labels["follow_instructions_".$language].'</div>
+				<div class="overlay__hints">
+					<div class="overlay__hint">
+						<div class="overlay__hint-symbol fa fa-location-arrow"></div>
+						<div class="overlay__hint-label">'.$labels["location_".$language].'</div>
+					</div>
+					<div class="overlay__hint">
+						<div class="overlay__hint-symbol fa fa-arrows-alt-v"></div>
+						<div class="overlay__hint-label">'.$labels["elevator_stairs_".$language].'</div>
+					</div>
+					<div class="overlay__hint">
+						<div class="overlay__hint-symbol fa fa-map-pin"></div>
+						<div class="overlay__hint-label">'.$labels["destination_".$language].'</div>
+					</div>
+				</div>';
 				
 				?>
-				<div class="overlay__text">Folgen Sie den Anweisungen auf dem Bildschirm.</div>
 			</div>
 		</div>
 		
@@ -113,13 +138,13 @@ $check = mysqli_num_rows($result);
 	
 			<section class="map">
 			
-				<div class="map__holder">
+				<div class="map__holder" data-orientation="270">
 				
 					<!--Map layers-->
 				
 					<?php
 					
-					$query = "SELECT * FROM ba_levels ORDER BY name ASC";
+					$query = "SELECT * FROM levels ORDER BY name ASC";
 					$result = mysqli_query($mysql, $query);
 					
 						while ($row = mysqli_fetch_assoc($result))
@@ -140,20 +165,106 @@ $check = mysqli_num_rows($result);
 						</div>';
 						}
 						
+					/*
+						
+					echo '<!--Rooms-->';
+					
+					$query = "SELECT * FROM rooms WHERE level = '2'";
+					$result = mysqli_query($mysql, $query);
+					
+						while ($row = mysqli_fetch_assoc($result))
+						{
+						$x1 = (float) $row["x1"];
+						$y1 = (float) $row["y1"];
+						$x2 = (float) $row["x2"];
+						$y2 = (float) $row["y2"];
+						
+						$height = $y2 - $y1;
+						$width = $x2 - $x1;
+						
+						echo '<div class="map__room" style="top: '.$y1.'%; left: '.$x1.'%; height: '.$height.'%; width: '.$width.'%;"></div>';
+						}
+					*/
+					
 					?>
+					
+					<!--Canvas Layer-->
+					
+					<canvas id="canvas" class="map__canvas"></canvas>
+					
+					<!--Level label-->
+					
+					<div class="map__label"><span></span></div>
 					
 					<!--Navigation Elements-->
 					
 					<?php
 					
-					echo '<div class="map__marker" data-style="location" data-level="'.$start[0].'" data-x="'.$start[1][0].'" data-y="'.$start[1][1].'"></div>
-					<div class="map__marker" data-style="destination" data-level="'.$end[0].'" data-x="'.$end[1][0].'" data-y="'.$end[1][1].'"></div>';
+					echo '<div class="map__marker" data-style="location" data-level="'.$start[0].'" data-x="'.$start[1][0].'" data-y="'.$start[1][1].'">
+						<div class="map__marker-icon fa fa-location-arrow"></div>
+					</div>
+					<div class="map__marker" data-style="destination" data-level="'.$end[0].'" data-x="'.$end[1][0].'" data-y="'.$end[1][1].'">
+						<div class="map__marker-icon fa fa-map-pin"></div>
+					</div>';
+					
+					//-->Load relevant paths
+					
+						for ($i = 0; $i < count($relevantLevels); $i++)
+						{
+						$query = "SELECT paths.* FROM paths, levels WHERE paths.level = levels.id && levels.name = '$relevantLevels[$i]'";
+						$result = mysqli_query($mysql, $query);
+						
+							while ($path = mysqli_fetch_assoc($result))
+							{
+							$levelId = $path["level"];
+							
+							$query2 = "SELECT name FROM levels WHERE id = '$levelId'";
+							$result2 = mysqli_query($mysql, $query2);
+							$row2 = mysqli_fetch_assoc($result2);
+							
+							$level = $row2["name"];
+								
+								if ($path["x1"] == $path["x2"])
+								{
+									if ($path["y2"] > $path["y1"])
+									{
+									$pathLength = $path["y2"] - $path["y1"];
+									}
+									else
+									{
+									$pathLength = $path["y1"] - $path["y2"];
+									}
+								
+								echo '<div class="map__path" data-level="'.$level.'" data-x1="'.$path["x1"].'" data-y1="'.$path["y1"].'" data-x2="'.$path["x2"].'" data-y2="'.$path["y2"].'" style="height: '.$pathLength.'%; width: 1%; top: '.$path["y1"].'%; left: '.$path["x1"].'%;"></div>';
+								}
+								else if ($path["y1"] == $path["y2"])
+								{
+									if ($path["x2"] > $path["x1"])
+									{
+									$pathLength = $path["x2"] - $path["x1"];
+									}
+									else
+									{
+									$pathLength = $path["x1"] - $path["x2"];
+									}
+								
+								echo '<div class="map__path" data-level="'.$level.'" data-x1="'.$path["x1"].'" data-y1="'.$path["y1"].'" data-x2="'.$path["x2"].'" data-y2="'.$path["y2"].'" style="height: 1%; width: '.$pathLength.'%; top: '.$path["y1"].'%; left: '.$path["x1"].'%;"></div>';
+								}
+							}
+						}
+						
+						//-->Get all stairs and elevators
+						
+						// $query = "SELECT * FROM rooms WHERE category = '1' || category = '2'"; //all stairs and elevators
+						$query = "SELECT * FROM rooms WHERE category = '2'"; //just use the elevator(s) for now
+						$result = mysqli_query($mysql, $query);
+						
+							while ($row = mysqli_fetch_assoc($result))
+							{
+							echo '<div class="map__level-switch" data-x="'.$row["doorX"].'" data-y="'.$row["doorY"].'"></div>';
+							}
 					
 					?>
-					
-					<!--<div class="map__path" style="height: 6%; width: 1%; top: 51%; left: 62%;"></div>
-					<div class="map__path" style="height: 1%; width: 9%; top: 51%; left: 62%;"></div>
-					<div class="map__path" style="height: 6%; width: 1%; top: 45%; left: 70%;"></div>-->
 					
 				</div>
 				
@@ -161,7 +272,7 @@ $check = mysqli_num_rows($result);
 				
 					<?php
 					
-						$query = "SELECT * FROM ba_levels ORDER BY name DESC";
+						$query = "SELECT * FROM levels ORDER BY name DESC";
 						$result = mysqli_query($mysql, $query);
 						
 							while ($row = mysqli_fetch_assoc($result))
@@ -175,7 +286,8 @@ $check = mysqli_num_rows($result);
 								$active = "false";
 								}
 
-							echo '<div class="map__level clickable transition-fast" data-level="'.$row["name"].'" data-active="'.$active.'" onclick="switchLevel('.$row["name"].')">'.$row["name"].'</div>';
+							// echo '<div class="map__level clickable transition-fast" data-level="'.$row["name"].'" data-active="'.$active.'" onclick="switchLevel('.$row["name"].')">'.$row["name"].'</div>';
+							echo '<div class="map__level readonly transition-fast" data-level="'.$row["name"].'" data-active="'.$active.'">'.$row["name"].'</div>'; //switching level disabled - just confuses the user
 							}
 					
 					?>
@@ -184,59 +296,7 @@ $check = mysqli_num_rows($result);
 			
 			</section>
 			
-			<section class="instruction">
-			
-				<div class="instruction__step" data-level="0">
-					<div class="instruction__symbol fa fa-long-arrow-alt-right"></div>
-					<div class="instruction__label">Nach rechts drehen</div>
-				</div>
-				<div class="instruction__distance" data-level="0">1 m</div>
-				<div class="instruction__step" data-level="0">
-					<div class="instruction__symbol fa fa-long-arrow-alt-up"></div>
-					<div class="instruction__label">Geradeaus zum Fahrstuhl gehen</div>
-				</div>
-				<div class="instruction__distance" data-level="0">15 m</div>
-				<div class="instruction__step">
-					<div class="instruction__symbol instruction__symbol--special fa fa-caret-up"></div>
-					<?php
-					
-					echo '<div class="instruction__label">In den '.$level["name"].'. Stock fahren<br /><small>Anschließend hier klicken:</small></div>';
-					
-					?>
-				</div>
-				<?php
-					
-					echo '<div class="instruction__button clickable" data-triggered="false" data-level="'.$level["name"].'" onclick="confirmNewLevel(this)"><span class="fa fa-check"></span><span class="fa fa-undo"></span><span data-text="done">'.$level["name"].'. Stock erreicht</span><span data-text="undo">Rückgängig</span></div>
-					
-					<div class="instruction__distance fa fa-arrows-alt-v"></div>
-					<div class="instruction__step" data-level="'.$level["name"].'" style="display: none;">
-						<div class="instruction__symbol fa fa-long-arrow-alt-up"></div>
-						<div class="instruction__label">Den Fahrstuhl verlassen</div>
-					</div>
-					<div class="instruction__distance" data-level="'.$level["name"].'" style="display: none;">2 m</div>
-					<div class="instruction__step" data-level="'.$level["name"].'" style="display: none;">
-						<div class="instruction__symbol fa fa-long-arrow-alt-left"></div>
-						<div class="instruction__label">Links abbiegen</div>
-					</div>
-					<div class="instruction__distance" data-level="'.$level["name"].'" style="display: none;">2 m</div>
-					<div class="instruction__step" data-level="'.$level["name"].'" style="display: none;">
-						<div class="instruction__symbol fa fa-long-arrow-alt-left"></div>
-						<div class="instruction__label">Hinter dem Fahrstuhl links abbiegen</div>
-					</div>
-					<div class="instruction__distance" data-level="'.$level["name"].'" style="display: none;">2 m</div>
-					<div class="instruction__step" data-level="'.$level["name"].'" style="display: none;">
-						<div class="instruction__symbol fa fa-long-arrow-alt-up"></div>
-						<div class="instruction__label">Geradeaus gehen</div>
-					</div>
-					<div class="instruction__distance" data-level="'.$level["name"].'" style="display: none;">10 m</div>
-					<div class="instruction__step" data-level="'.$level["name"].'" style="display: none;">
-						<div class="instruction__symbol fa fa-long-arrow-alt-right"></div>
-						<div class="instruction__label">Raum '.$room["no"].' befindet sich auf der rechten Seite</div>
-					</div>';
-				
-				?>
-			
-			</section>
+			<section class="instruction"></section>
 			
 		</div>
 	

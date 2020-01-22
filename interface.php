@@ -51,7 +51,7 @@ include_once("mysql.php");
 							<option value="" disabled selected>Please select</div>
 							<?php
 							
-							$query = "SELECT * FROM ba_levels ORDER BY id ASC";
+							$query = "SELECT * FROM levels ORDER BY id ASC";
 							$result = mysqli_query($mysql, $query);
 							
 								while ($row = mysqli_fetch_assoc($result))
@@ -72,7 +72,7 @@ include_once("mysql.php");
 							<option value="" disabled selected>Please select</div>
 							<?php
 							
-							$query = "SELECT * FROM ba_institutes ORDER BY name_de ASC";
+							$query = "SELECT * FROM institutes ORDER BY name_de ASC";
 							$result = mysqli_query($mysql, $query);
 							
 								while ($row = mysqli_fetch_assoc($result))
@@ -93,7 +93,7 @@ include_once("mysql.php");
 							<option value="" disabled selected>optional</div>
 							<?php
 							
-							$query = "SELECT * FROM ba_categories ORDER BY name_de ASC";
+							$query = "SELECT * FROM categories ORDER BY name_de ASC";
 							$result = mysqli_query($mysql, $query);
 							
 								while ($row = mysqli_fetch_assoc($result))
@@ -139,7 +139,7 @@ include_once("mysql.php");
 			
 			<?php
 			
-			$query = "SELECT * FROM ba_rooms ORDER BY id DESC";
+			$query = "SELECT * FROM rooms ORDER BY id DESC";
 			$result = mysqli_query($mysql, $query);
 			$amount = mysqli_num_rows($result);
 			

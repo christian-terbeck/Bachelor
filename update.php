@@ -35,15 +35,15 @@ include_once("mysql.php");
 	
 		if ($id > 0)
 		{
-		$query = "DELETE FROM ba_people WHERE roomId = '$id'";
+		$query = "DELETE FROM people WHERE room = '$id'";
 		mysqli_query($mysql, $query);
 		
-		$query = "UPDATE ba_rooms SET level = '$level', no = '$no', institute = '$institute', description = '$description', category = '$category', x1 = '$x1', y1 = '$y1', x2 = '$x2', y2 = '$y2', doorX = '$doorX', doorY = '$doorY', hoursStart = '$hoursStart', hoursEnd = '$hoursEnd' WHERE id = '$id'";
+		$query = "UPDATE rooms SET level = '$level', no = '$no', institute = '$institute', description = '$description', category = '$category', x1 = '$x1', y1 = '$y1', x2 = '$x2', y2 = '$y2', doorX = '$doorX', doorY = '$doorY', hoursStart = '$hoursStart', hoursEnd = '$hoursEnd' WHERE id = '$id'";
 		mysqli_query($mysql, $query);
 		}
 		else
 		{
-		$query = "INSERT INTO ba_rooms (`level`, `no`, `institute`, `description`, `category`, `x1`, `y1`, `x2`, `y2`, `doorX`, `doorY`, `hoursStart`, `hoursEnd`) VALUES ('$level', '$no', '$institute', '$description', '$category', '$x1', '$y1', '$x2', '$y2', '$doorX', '$doorY', '$hoursStart', '$hoursEnd')";
+		$query = "INSERT INTO rooms (`level`, `no`, `institute`, `description`, `category`, `x1`, `y1`, `x2`, `y2`, `doorX`, `doorY`, `hoursStart`, `hoursEnd`) VALUES ('$level', '$no', '$institute', '$description', '$category', '$x1', '$y1', '$x2', '$y2', '$doorX', '$doorY', '$hoursStart', '$hoursEnd')";
 		mysqli_query($mysql, $query);
 		
 		$id = mysqli_insert_id($mysql);
@@ -59,7 +59,7 @@ include_once("mysql.php");
 			
 				if (strlen($tmpPerson) > 0)
 				{
-				$query = "INSERT INTO ba_people (`name`, `roomId`) VALUES ('$tmpPerson', '$id')";
+				$query = "INSERT INTO people (`name`, `room`) VALUES ('$tmpPerson', '$id')";
 				mysqli_query($mysql, $query);
 				}
 			}
@@ -70,10 +70,10 @@ include_once("mysql.php");
 	{
 	$id = mysqli_real_escape_string($mysql, $_POST["id"]);
 	
-	$query = "DELETE FROM ba_rooms WHERE id = '$id'";
+	$query = "DELETE FROM rooms WHERE id = '$id'";
 	mysqli_query($mysql, $query);
 	
-	$query = "DELETE FROM ba_people WHERE roomId = '$id'";
+	$query = "DELETE FROM people WHERE room = '$id'";
 	mysqli_query($mysql, $query);
 	}
 	

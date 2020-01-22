@@ -3,9 +3,9 @@
 //-->DB-Connect
 
 $dbhost = "localhost";
-$dbname = "homepage";
-$dbuser = "web563";
-$dbpass = "lCgz62*1";
+$dbname = "bachelor";
+$dbuser = "bachelor_user";
+$dbpass = "aKp09w~0";
 
 $mysql = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
 

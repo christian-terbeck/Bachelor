@@ -43,7 +43,7 @@ $baseUrl = str_replace("index.php", "", $baseUrl);
 		<header class="header">
 		
 			<h1 class="header__head" data-de="GEO1 Informationssystem" data-en="GEO1 information system" data-es="GEO1 sistema de información">GEO1 Informationssystem</h1>
-			<h2 class="header__subhead" data-de="Wonach suchen Sie?" data-en="What are you searching for?" data-es="Que estas buscando?">Wonach suchen Sie?</h1>
+			<h2 class="header__subhead" data-de="Wonach suchen Sie?" data-en="What are you searching for?" data-es="Qué está buscando?">Wonach suchen Sie?</h1>
 		
 		</header>
 		
@@ -52,7 +52,7 @@ $baseUrl = str_replace("index.php", "", $baseUrl);
 			<ul class="nav__categories">
 				<li class="clickable transition-fast" data-name="employees" data-active="true" onclick="switchCategory(this)">
 					<span class="fa fa-users"></span>
-					<span data-de="Mitarbeiter" data-en="Employees" data-es="Empleado">Mitarbeiter</span>
+					<span data-de="Mitarbeiter" data-en="Employees" data-es="Empleados">Mitarbeiter</span>
 				</li>
 				<li class="clickable transition-fast" data-name="rooms" data-active="false" onclick="switchCategory(this)">
 					<span class="fa fa-door-closed"></span>
@@ -60,7 +60,7 @@ $baseUrl = str_replace("index.php", "", $baseUrl);
 				</li>
 				<li class="clickable transition-fast" data-name="institutes" data-active="false" onclick="switchCategory(this)">
 					<span class="fa fa-university"></span>
-					<span data-de="Institute" data-en="Institutes" data-es="Institutos">Institute</span>
+					<span data-de="Institute" data-en="Institutes" data-es="Departamentos">Institute</span>
 				</li>
 				<li class="clickable transition-fast" data-name="search" data-active="false" onclick="switchCategory(this)">
 					<span class="fa fa-search"></span>
@@ -74,13 +74,13 @@ $baseUrl = str_replace("index.php", "", $baseUrl);
 			
 			<ul class="aside__items">
 				<li class="clickable" onclick="setLanguage('de')">
-					<img class="box-shadow" src="img/de.png" alt="Deutsch" title="Deutsch" />
+					<img class="box-shadow" src="img/flags/de.png" alt="Deutsch" title="Deutsch" />
 				</li>
 				<li class="clickable" onclick="setLanguage('en')">
-					<img class="box-shadow" src="img/en.png" alt="English" title="English" />
+					<img class="box-shadow" src="img/flags/en.png" alt="English" title="English" />
 				</li>
 				<li class="clickable" onclick="setLanguage('es')">
-					<img class="box-shadow" src="img/es.png" alt="Español" title="Español" />
+					<img class="box-shadow" src="img/flags/es.png" alt="Español" title="Español" />
 				</li>
 			</ul>
 		
@@ -111,7 +111,7 @@ $baseUrl = str_replace("index.php", "", $baseUrl);
 					
 						for ($i = 0; $i < count($alphabet); $i++)
 						{
-						$query = "SELECT * FROM ba_people WHERE name LIKE '$alphabet[$i]%' ORDER BY name ASC";
+						$query = "SELECT * FROM people WHERE name LIKE '$alphabet[$i]%' ORDER BY name ASC";
 						$result = mysqli_query($mysql, $query);
 						$recordsFound = mysqli_num_rows($result);
 						
@@ -122,16 +122,18 @@ $baseUrl = str_replace("index.php", "", $baseUrl);
 								
 								while ($row = mysqli_fetch_assoc($result))
 								{
+								$room = $row["room"];
+								
 								echo '<div class="accordion-box" data-active="false">
 									<div class="accordion-box__head clickable" onclick="accordionBox(this)">
 										<div class="accordion-box__symbol transition-fast fa fa-chevron-right"></div>
 										<div class="accordion-box__label">'.$row["name"].'</div>
 									</div>
-									<div class="accordion-box__content">
-										<br /><strong><i>ADD MORE CONTENT HERE.. INFO.. ROOM ETC.</i></strong><br /><br />
-										<p data-de="Scannen Sie diesen QR-Code mit Ihrem Smartphone.<br />Die Wegbeschreibung wird anschließend auf Ihrem Endgerät angezeigt." data-en="Scan this QR code with your smartphone.<br />The directions are then displayed on your device." data-es="Escanee este código QR con su teléfono inteligente.<br />Las instrucciones se muestran en su dispositivo.">Scannen Sie diesen QR-Code mit Ihrem Smartphone.<br />Die Wegbeschreibung wird anschließend auf Ihrem Endgerät angezeigt.</p>
-										<img class="qr-code" src="'.$baseUrl.'qr.php?language=de&destination='.$row["roomId"].'" alt="de" />
-									</div>
+									<div class="accordion-box__content">';
+										
+										include("room_view.php");
+										
+									echo '</div>
 								</div>';
 								}
 							
@@ -143,55 +145,211 @@ $baseUrl = str_replace("index.php", "", $baseUrl);
 				</div>
 				
 				<div class="content__page" data-name="rooms" data-active="false">
-				
-					<!--Categorized content overview-->
+					
+					<!--Accordion Boxes-->
 					
 					<?php
 					
 					$levels = ["-1", "0", "1", "2", "3", "4", "5"];
+					$levelLabels = [["Raum 0.01 - 0.99", "Room 0.01 - 0.99", "Habitación 0.01 - 0.99"], ["Raum 1 - 99", "Room 1 - 99", "Habitación 1 - 99"], ["Raum 100 - 199", "Room 100 - 199", "Habitación 100 - 199"], ["Raum 200 - 299", "Room 200 - 299", "Habitación 200 - 299"], ["Raum 300 - 399", "Room 300 - 399", "Habitación 300 - 399"], ["Raum 400 - 499", "Room 400 - 499", "Habitación 400 - 499"], ["Raum 500 - 599", "Room 500 - 599", "Habitación 500 - 599"]];
+					
+					echo '<!--Categorized content overview-->
+					
+					<ul class="content__shortlinks readonly">';
+					
+						for ($i = 0; $i < count($levels); $i++)
+						{
+						echo '<li class="clickable transition-fast" data-name="'.$levels[$i].'" onclick="tab(this)" data-de="'.$levelLabels[$i][0].'" data-en="'.$levelLabels[$i][1].'" data-es="'.$levelLabels[$i][2].'">'.$levelLabels[$i][0].'</li>';
+						}
+					
+					echo '</ul>
+					
+					<!--Accordion Boxes-->';
+					
+						for ($i = 0; $i < count($levels); $i++)
+						{
+						$query = "SELECT rooms.* FROM rooms, levels WHERE rooms.no != '' && rooms.level = levels.id && levels.name = '$levels[$i]' ORDER BY rooms.no ASC";
+						$result = mysqli_query($mysql, $query);
+						$recordsFound = mysqli_num_rows($result);
+						
+							if ($recordsFound > 0)
+							{						
+							echo '<h3 class="content__tab" data-name="'.$levels[$i].'" data-de="'.$levelLabels[$i][0].'" data-en="'.$levelLabels[$i][1].'" data-es="'.$levelLabels[$i][2].'">'.$levelLabels[$i][0].'</h3>
+							<div class="content__container">';
+								
+								while ($row = mysqli_fetch_assoc($result))
+								{
+								$room = $row["id"];
+								
+								echo '<div class="accordion-box" data-active="false">
+									<div class="accordion-box__head clickable" onclick="accordionBox(this)">
+										<div class="accordion-box__symbol transition-fast fa fa-chevron-right"></div>
+										<div class="accordion-box__label" data-de="Raum '.$row["no"].'" data-en="Room '.$row["no"].'" data-es="Habitación '.$row["no"].'">Raum '.$row["no"].'</div>
+									</div>
+									<div class="accordion-box__content">';
+										
+										include("room_view.php");
+										
+									echo '</div>
+								</div>';
+								}
+							
+							echo '</div>';
+							}
+						}
 					
 					?>
-					
-					<ul class="content__shortlinks readonly">
-						<li class="clickable transition-fast" data-name="000" onclick="tab(this)" data-de="Raum 0.01 - 0.99" data-en="Room 0.01 - 0.99" data-es="Habitación 0.01 - 0.99">Raum 0.01 - 0.99</li>
-						<li class="clickable transition-fast" data-name="001" onclick="tab(this)" data-de="Raum 1 - 99" data-en="Room 1 - 99" data-es="Habitación 1 - 99">Raum 1 - 99</li>
-						<li class="clickable transition-fast" data-name="100" onclick="tab(this)" data-de="Raum 100 - 199" data-en="Room 100 - 199" data-es="Habitación 100 - 199">Raum 100 - 199</li>
-						<li class="clickable transition-fast" data-name="200" onclick="tab(this)" data-de="Raum 200 - 299" data-en="Room 200 - 299" data-es="Habitación 200 - 299">Raum 200 - 299</li>
-						<li class="clickable transition-fast" data-name="300" onclick="tab(this)" data-de="Raum 300 - 399" data-en="Room 300 - 399" data-es="Habitación 300 - 399">Raum 300 - 399</li>
-						<li class="clickable transition-fast" data-name="400" onclick="tab(this)" data-de="Raum 300 - 499" data-en="Room 400 - 499" data-es="Habitación 400 - 499">Raum 400 - 499</li>
-						<li class="clickable transition-fast" data-name="500" onclick="tab(this)" data-de="Raum 500 - 599" data-en="Room 500 - 599" data-es="Habitación 500 - 599">Raum 500 - 599</li>
-						<li class="clickable transition-fast" data-name="999" onclick="tab(this)" data-de="Spezielle Räume" data-en="Special rooms" data-es="Habitaciones especiales">Spezielle Räume</li>
-					</ul>
 				
 				</div>
 				
 				<div class="content__page" data-name="institutes" data-active="false">
 				
-					<!--Categorized content overview-->
+					<?php
+				
+					echo '<!--Categorized content overview-->
 					
-					<ul class="content__shortlinks readonly">
-						<li class="clickable transition-fast" data-name="" onclick="tab(this)" data-de="Geographische Kommission" data-en="" data-es="">Geographische Kommission</li>
-						<li class="clickable transition-fast" data-name="" onclick="tab(this)" data-de="Didaktik der Geographie" data-en="" data-es="">Didaktik der Geographie</li>
-						<li class="clickable transition-fast" data-name="" onclick="tab(this)" data-de="Institut für Geographie" data-en="" data-es="">Institut für Geographie</li>
-						<li class="clickable transition-fast" data-name="" onclick="tab(this)" data-de="Institut für Geoinformatik" data-en="" data-es="">Institut für Geoinformatik</li>
-						<li class="clickable transition-fast" data-name="" onclick="tab(this)" data-de="Institut für Landschaftsökologie" data-en="" data-es="">Institut für Landschaftsökologie</li>
-						<li class="clickable transition-fast" data-name="" onclick="tab(this)" data-de="Institut für Paläontologie" data-en="" data-es="">Institut für Paläontologie</li>
-						<li class="clickable transition-fast" data-name="" onclick="tab(this)" data-de="Diverses" data-en="" data-es="">Diverses</li>
-					</ul>
+					<ul class="content__shortlinks readonly">';
+						
+						$query = "SELECT * FROM institutes ORDER BY id ASC";
+						$result = mysqli_query($mysql, $query);
+						
+							while ($row = mysqli_fetch_assoc($result))
+							{
+							echo '<li class="clickable transition-fast" data-name="institute-'.$row["id"].'" onclick="tab(this)" data-de="'.$row["name_de"].'" data-en="'.$row["name_en"].'" data-es="'.$row["name_es"].'">'.$row["name_de"].'</li>';
+							}
+						
+					echo '</ul>
+						
+					<!--Accordion Boxes-->';
+					
+					$result = mysqli_query($mysql, $query);
+					
+						while ($row = mysqli_fetch_assoc($result))
+						{
+						$tmpInstitute = $row["id"];
+						
+						$query2 = "SELECT * FROM rooms WHERE institute = '$tmpInstitute' ORDER BY no ASC";
+						$result2 = mysqli_query($mysql, $query2);
+						$recordsFound = mysqli_num_rows($result2);
+						
+							if ($recordsFound > 0)
+							{						
+							echo '<h3 class="content__tab" data-name="institute-'.$row["id"].'" data-de="'.$row["name_de"].'" data-en="'.$row["name_en"].'" data-es="'.$row["name_es"].'">'.$row["name_de"].'</h3>
+							<div class="content__container">';
+								
+								while ($row2 = mysqli_fetch_assoc($result2))
+								{
+								$room = $row2["id"];
+								
+								echo '<div class="accordion-box" data-active="false">
+									<div class="accordion-box__head clickable" onclick="accordionBox(this)">
+										<div class="accordion-box__symbol transition-fast fa fa-chevron-right"></div>
+										<div class="accordion-box__label" data-de="Raum '.$row2["no"].'" data-en="Room '.$row2["no"].'" data-es="Habitación '.$row2["no"].'">Raum '.$row2["no"].'</div>
+									</div>
+									<div class="accordion-box__content">';
+										
+										include("room_view.php");
+										
+									echo '</div>
+								</div>';
+								}
+							
+							echo '</div>';
+							}
+						}
+						
+					?>
 				
 				</div>
 				
 				<div class="content__page" data-name="search" data-active="false">
-					<ul>
-						<li>Sucheingabefeld, das auch geleert werden muss, wenn der Tab gewechselt wird</li>
-						<li>kurze Anweisung zum Eingabefeld... "Suchbegriff"</li>
-						<li>Gefundene Personen</li>
-						<li>Gefundene Räume</li>
-						<li>Gefundene Institute</li>
-						<li>Suche beginnt ab dem ersten Buchstaben, Ergebnisse werden entweder schon vorgeladen(vermutlich sinnvoller!) oder live aus der Datenbank abgefragt</li>
-						<li>Suche evtl. mit Einzelbuchstaben (Touch-Tastatur), da dies deutlich einfacher auf einem großen Touchscreen bedienbar ist - dann natürlich kein Eingabefeld, sondern eine Zeichenkette anhand der gedrückten Buchstaben zusammensetzen</li>
-						<li>evtl. nur Buchstaben verfügbar machen, die unter den gegebenen Umständen noch zu Ergebnissen führen</li>
-					</ul>
+				
+					<?php
+					
+					$keyboard = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "ß", "CLEAR", "\n", "Q", "W", "E", "R", "T", "Z", "U", "I", "O", "P", "Ü", "\n", "A", "S", "D", "F", "G", "H", "J", "K", "L", "Ö", "Ä", "\n", "Y", "X", "C", "V", "B", "N", "M"];
+					
+					echo '<ul class="content__keyboard readonly">';
+					
+						for ($i = 0; $i < count($keyboard); $i++)
+						{
+							if ($keyboard[$i] == "CLEAR")
+							{
+							echo '<li class="clickable transition-fast fa fa-long-arrow-alt-left" data-name="CLEAR" onclick="clearKeyboard()" style="padding: 10px 20px;"></li>';	
+							}
+							else if ($keyboard[$i] == "\n")
+							{
+							echo '<br />';
+							}
+							else
+							{
+							echo '<li class="clickable transition-fast" data-name="'.mb_strtolower($keyboard[$i]).'" onclick="keyboard(this)">'.$keyboard[$i].'</li>';
+							}
+						}
+						
+					echo '<br /><li class="clickable transition-fast" data-name=" " data-de="Leerzeichen" data-en="Space" data-es="Espacio" onclick="keyboard(this)" style="padding: 10px 50px;">Leerzeichen</li>
+					</ul>';
+					
+					$query = "SELECT * FROM rooms WHERE no != '' ORDER BY level ASC, no ASC";
+					$result = mysqli_query($mysql, $query);
+					$recordsFound = mysqli_num_rows($result);
+					
+						if ($recordsFound > 0)
+						{
+						echo '<h3 class="content__tab" data-name="search" style="display: none;"></h3>
+						<div class="content__container" data-name="search">';
+						
+							while ($row = mysqli_fetch_assoc($result))
+							{
+							$room = $row["id"];
+							$people = Array();
+							
+							$peopleQuery = "SELECT * FROM people WHERE room = '$room' ORDER BY name ASC";
+							$peopleResult = mysqli_query($mysql, $peopleQuery);
+							
+								while ($peopleRow = mysqli_fetch_assoc($peopleResult))
+								{
+								$people[] = $peopleRow["name"];
+								}
+								
+							$label_de = "Raum ".$row["no"];
+							$label_en = "Room ".$row["no"];
+							$label_es = "Habitación ".$row["no"];
+							
+								if (count($people) > 0)
+								{
+								$label_de .= " &ndash; ".implode(", ", $people);
+								$label_en .= " &ndash; ".implode(", ", $people);
+								$label_es .= " &ndash; ".implode(", ", $people);
+								}
+								
+							$institute = $row["institute"];
+							
+							$instituteQuery = "SELECT * FROM institutes WHERE id = '$institute'";
+							$instituteResult = mysqli_query($mysql, $instituteQuery);
+							$instituteRow = mysqli_fetch_assoc($instituteResult);
+							
+							$label_de .= " (".$instituteRow["name_de"].")";
+							$label_en .= " (".$instituteRow["name_en"].")";
+							$label_es .= " (".$instituteRow["name_es"].")";
+							
+							echo '<div class="accordion-box" data-active="false" style="display: none;">
+								<div class="accordion-box__head clickable" onclick="accordionBox(this)">
+									<div class="accordion-box__symbol transition-fast fa fa-chevron-right"></div>
+									<div class="accordion-box__label" data-de="'.$label_de.'" data-en="'.$label_en.'" data-es="'.$label_es.'">'.$label_de.'</div>
+								</div>
+								<div class="accordion-box__content">';
+									
+									include("room_view.php");
+									
+								echo '</div>
+							</div>';
+							}
+							
+						echo '</div>';
+						}
+						
+					?>
+					
 				</div>
 			
 			</div>

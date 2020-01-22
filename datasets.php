@@ -2,7 +2,7 @@
 
 include_once("mysql.php");
 
-$query = "SELECT * FROM ba_rooms ORDER BY level ASC, no ASC";
+$query = "SELECT * FROM rooms ORDER BY level ASC, no ASC";
 $result = mysqli_query($mysql, $query);
 
 	while ($row = mysqli_fetch_assoc($result))
@@ -10,7 +10,7 @@ $result = mysqli_query($mysql, $query);
 	$tmpId = $row["id"];
 	$tmpPeople = Array();
 	
-	$query2 = "SELECT name FROM ba_people WHERE roomId = '$tmpId'";
+	$query2 = "SELECT name FROM people WHERE room = '$tmpId'";
 	$result2 = mysqli_query($mysql, $query2);
 	
 		while ($row2 = mysqli_fetch_assoc($result2))
