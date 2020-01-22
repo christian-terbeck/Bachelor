@@ -2,7 +2,7 @@
 
 function api(type, data)
 {
-var authorization_key = '1234';
+var authorization_key = 'GEO1';
 var url = 'https://christian-terbeck.de/projects/ba/request.php';
 
 $.ajax({
@@ -21,9 +21,9 @@ $.ajax({
 		console.log(data.message);
 		}
 	},
-	error: function(data) {
+	error: function(err) {
 		
-		console.log('unable to connect: ' + data);
+		console.log('unable to connect: ' + err);
 	}
 });
 }
